@@ -1,0 +1,81 @@
+# Core Framework
+argon2-cffi==23.1.0
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# Database - PostgreSQL
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+psycopg2-binary==2.9.10
+alembic==1.14.0
+
+# Database - SQLModel (ORM built on SQLAlchemy)
+sqlmodel==0.0.27
+
+# Pydantic for data validation
+pydantic==2.10.5
+pydantic-settings==2.7.1
+pydantic[email]==2.10.5
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.20
+bcrypt==4.2.1
+PyJWT==2.10.1
+pwdlib==0.2.1  # Password hashing library - MISSING PACKAGE!
+
+# Redis for caching
+redis==5.2.1
+hiredis==3.0.0
+
+# Date and Time
+python-dateutil==2.9.0.post0
+
+# HTTP Client
+httpx==0.28.1
+aiohttp==3.11.11
+
+# Email
+fastapi-mail==1.4.2
+
+# CORS
+fastapi-cors==0.0.6
+
+# Environment Variables
+python-dotenv==1.0.1
+
+# Logging
+python-json-logger==3.2.1
+
+# Utilities - Missing pwlid dependency
+pydantic-core==2.27.2
+annotated-types==0.7.0
+
+# Optional: File Upload
+python-magic==0.4.27
+pillow==11.1.0
+
+# Optional: Excel/CSV Processing
+pandas==2.2.3
+openpyxl==3.1.5
+
+# Optional: Background Tasks
+celery==5.4.0
+flower==2.0.1
+
+# Optional: Monitoring
+sentry-sdk[fastapi]==2.19.2
+
+# Production Server
+gunicorn==23.0.0
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+
+# Code Quality
+black==24.10.0
+ruff==0.8.5
+mypy==1.14.0
