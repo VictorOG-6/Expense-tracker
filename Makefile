@@ -222,6 +222,12 @@ lint: ## Run linting
 	docker compose -f $(COMPOSE_FILE) exec app ruff check .
 	docker compose -f $(COMPOSE_FILE) exec app black --check .
 
+.PHONY: lint-local
+lint-local: ## Run linting
+	@echo Running linters...
+	black .
+	ruff check --fix
+
 .PHONY: format
 format: ## Format code
 	@echo Formatting code...

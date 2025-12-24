@@ -15,6 +15,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
+
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
@@ -24,6 +25,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode.update({"exp": expire, "type": "access"})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
 
 def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
@@ -39,32 +41,36 @@ def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(session: SessionDep, token: str = Depends(oauth2_scheme)) -> User:
+
+async def get_current_user(
+    session: SessionDep, token: str = Depends(oauth2_scheme)
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     token_data = verify_token(token, "access", credentials_exception)
     user = session.exec(select(User).where(User.email == token_data.username)).first()
-    
+
     if user is None:
         raise credentials_exception
     return user
 
-def verify_token(token: str, token_type: str,credentials_exception):
+
+def verify_token(token: str, token_type: str, credentials_exception):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         if payload.get("type") != token_type:
             return None
-        
+
         email = payload.get("sub")
         user_id = payload.get("user_id")
         jti = payload.get("jti")
 
         if email is None or user_id is None:
             raise credentials_exception
-        return TokenData(username=email, user_id=user_id, jti=jti )
+        return TokenData(username=email, user_id=user_id, jti=jti)
     except InvalidTokenError:
         raise credentials_exception
