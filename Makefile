@@ -226,7 +226,7 @@ lint: ## Run linting
 lint-local: ## Run linting
 	@echo Running linters...
 	black .
-	ruff check --fix
+	ruff check --fix .
 
 .PHONY: format
 format: ## Format code
