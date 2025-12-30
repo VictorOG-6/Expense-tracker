@@ -8,7 +8,7 @@ from models import (
     TransactionsUpdate,
     User,
 )
-from access_token import get_current_user
+from services.access_token import get_current_user
 
 router = APIRouter(prefix="/transactions", tags=["Transactionss"])
 

@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import RedirectResponse
 from sqlmodel import select
 from typing import Annotated
 from datetime import datetime, timezone, timedelta
@@ -11,16 +12,26 @@ from models import (
     RefreshToken,
     RefreshTokenRequest,
     AuthModel,
+    GoogleUser,
 )
 from database import SessionDep
-from access_token import (
+from services.access_token import (
     create_access_token,
     create_refresh_token,
     verify_token,
     REFRESH_TOKEN_EXPIRE_DAYS,
 )
+from authlib.integrations.starlette_client import OAuth, OAuthError
+from authlib.integrations.base_client import OAuthError as BaseOAuthError
+from services.google import get_or_create_google_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+oauth = OAuth()
+
+GOOGLE_CLIENT_ID = ""
+GOOGLE_CLIENT_SECRET = ""
+GOOGLE_REDIRECT_URI = "http://localhost/auth/callback/google"
+FRONTEND_URL = ""
 
 
 def create_tokens_for_user(user: User, session: SessionDep):
@@ -43,6 +54,46 @@ def create_tokens_for_user(user: User, session: SessionDep):
     session.commit()
 
     return access_token, refresh_token
+
+
+@router.get("/google")
+async def login_google(request: Request):
+    """Initiate Google OAuth flow"""
+    return await oauth.google.authorize_redirect(request, GOOGLE_REDIRECT_URI)
+
+
+@router.get("/callback/google")
+async def auth_google(request: Request, session: SessionDep):
+    """Handle Google OAuth callback and create user session"""
+    try:
+        user_response = await oauth.google.authorize_access_token(request)
+    except (OAuthError, BaseOAuthError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials with Google",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user_info = user_response.get("userinfo")
+
+    if not user_info:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to retrieve user information from Google",
+        )
+
+    google_user = GoogleUser(**user_info)
+
+    # Get or create user
+    user = get_or_create_google_user(google_user, session)
+
+    # Create tokens using the same pattern as regular login
+    access_token, refresh_token = create_tokens_for_user(user, session)
+
+    # Redirect to frontend with tokens
+    return RedirectResponse(
+        f"{FRONTEND_URL}/auth?access_token={access_token}&refresh_token={refresh_token}"
+    )
 
 
 @router.post("/login", response_model=AuthModel)

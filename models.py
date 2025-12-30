@@ -4,13 +4,25 @@ from pwdlib import PasswordHash
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
+from pydantic import EmailStr
 
 password_hash = PasswordHash.recommended()
 
 
+class GoogleUser(SQLModel):
+    sub: str  # Google's unique user ID
+    email: EmailStr
+    email_verified: bool = False
+    name: Optional[str] = None
+    given_name: Optional[str] = None
+    family_name: Optional[str] = None
+    picture: Optional[str] = None
+    locale: Optional[str] = None
+
+
 class UserBase(SQLModel):
     name: str
-    email: str
+    email: EmailStr
 
 
 class User(UserBase, table=True):

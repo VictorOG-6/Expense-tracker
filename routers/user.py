@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import select
 from models import UserRead, User, UserCreate, password_hash, AuthModel
 from database import SessionDep
-from access_token import get_current_user
+from services.access_token import get_current_user
 from routers.auth import create_tokens_for_user
 
 router = APIRouter(prefix="/user", tags=["Users"])
